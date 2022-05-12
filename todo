@@ -1,0 +1,139 @@
+#!/bin/bash
+todosh_version=1.0.0
+dir=$(pwd)
+parentdir=$(basename $(builtin cd $dir; pwd))
+
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+normal=$(tput sgr0)
+
+check_list_exists () {
+    if [[ ! -f $dir/.todo ]]
+    then
+        echo "A todo list was not found in this directory."
+        read -p "Create a todo list? [y/n] " yn
+        case $yn in
+            [Yy]* ) 
+                touch .todo
+                echo "Created a new todo list at $parentdir stored in .todo"
+                exit 0
+                ;;
+            [Nn]* )
+                echo "A todo list will not be created."
+                exit 0
+                ;;
+            * )
+                echo "Please input Yy/Nn."
+                exit 1
+        esac
+    fi
+}
+
+delete_list () {
+    if [[ ! -f $dir/.todo ]]
+    then
+        echo "A todo list does not exist here."
+        exit 1
+    else
+        read -p "Are you sure you want to delete the todo list here? [y/n] " yn
+        case $yn in
+            [Yy]* )
+                rm .todo
+                echo "todo list deleted."
+                ;;
+            [Nn]* )
+                echo "Deletion aborted."
+                exit 0
+                ;;
+            * ) 
+                echo "Please input Yy/Nn."
+                exit 1
+        esac
+    fi
+}  
+
+print_todo () {
+    COLUMNS=$(tput cols) 
+    title="todo list at $parentdir"
+    printf "%*s\n\n" $(((${#title}+$COLUMNS)/2)) "$title"
+
+    printf '\t%s\n' "Tasks to complete"
+    i=1
+    while IFS= read -r line; do 
+        printf '\t%s %s\n' "${red}$i" "$line${normal}"
+        ((i++))
+    done <.todo
+    printf "\n"
+
+    # printf '\t%s\n' "Recent tasks completed"
+    # while IFS= read -r line; do arr+=("$line"); done <.todo
+    # length=${#arr[@]}
+    # for (( idx=$length-1; idx>length-6 ; idx-- )) ; do
+    #     num=$((idx+1))
+    #     printf '\t%s %s\n' "${green}$num" "${arr[idx]}${normal}"
+    # done
+}
+
+add_task () {
+    echo $* >> $dir/.todo
+    echo "Task added!"
+}
+
+done_task () {
+    re='^[0-9]+$'
+    if ! [[ $1 =~ $re ]] 
+    then
+        echo "Please enter a number."  
+        exit 1
+    else
+        task=$(sed -n $1p $dir/.todo)
+        sed -i '' "${1}d" $dir/.todo
+        echo "Task $1: $task completed!"
+    fi
+}
+
+while getopts 'a:f:vVd' OPTION; do
+    case "$OPTION" in
+        a)
+            check_list_exists
+            add_task $OPTARG
+            ;;
+        f)
+            check_list_exists
+            done_task $OPTARG
+            ;;  
+        d)
+            check_list_exists
+            delete_list
+            ;;
+        V)
+            COLUMNS=$(tput cols) 
+            ver="todosh Version $todosh_version"
+            ver2="by Jon Linkens" 
+            ver3="https://github.com/JonLinkens/todosh"
+            printf "%*s\n\n" $(((${#ver}+$COLUMNS)/2)) "$ver"
+            printf "%*s\n" $(((${#ver2}+$COLUMNS)/2)) "$ver2"
+            printf "%*s\n" $(((${#ver3}+$COLUMNS)/2)) "$ver3"
+            ;;
+        v)
+            echo "verbose"
+            ;;
+        ?)
+            echo "script usage: helloworld [-a task | -d tasknumber]" >&2
+            exit 1
+            ;;
+    esac
+done
+shift "$(($OPTIND -1))"
+
+if [ $OPTIND -eq 1 ]; then 
+    check_list_exists
+    print_todo
+fi
+exit 0
+
+
+# status (active, finished)
+# coloured output 
+# filters
+# expiry?
