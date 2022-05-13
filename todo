@@ -115,11 +115,8 @@ while getopts 'a:f:vVd' OPTION; do
             printf "%*s\n" $(((${#ver2}+$COLUMNS)/2)) "$ver2"
             printf "%*s\n" $(((${#ver3}+$COLUMNS)/2)) "$ver3"
             ;;
-        v)
-            echo "verbose"
-            ;;
         ?)
-            echo "script usage: helloworld [-a task | -d tasknumber]" >&2
+            echo "script usage: helloworld [-a task | -f tasknumber | -d | -V]" >&2
             exit 1
             ;;
     esac
