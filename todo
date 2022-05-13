@@ -88,7 +88,7 @@ done_task () {
     else
         task=$(sed -n $1p $dir/.todo)
         sed -i '' "${1}d" $dir/.todo
-        echo "Task $1: $task completed!"
+        printf "%s\n" "${green}Task $1: $task completed!${normal}"
     fi
 }
 
@@ -131,9 +131,3 @@ if [ $OPTIND -eq 1 ]; then
     print_todo
 fi
 exit 0
-
-
-# status (active, finished)
-# coloured output 
-# filters
-# expiry?
