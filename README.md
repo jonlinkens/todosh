@@ -1,4 +1,6 @@
 # todosh
+**This project has been rewritten in Rust and is now maintained at https://github.com/JonLinkens/todosh-rs**
+
 A lightweight to do list for managing tasks in a shell.  
 
 <p align="center">
